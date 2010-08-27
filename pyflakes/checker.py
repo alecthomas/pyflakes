@@ -115,8 +115,10 @@ class Checker(ast.NodeVisitor):
     def pop_scope(self):
         scope = self.scope_stack.pop()
         if isinstance(scope, FunctionScope):
+            upscope = self.scope
             for name, value in scope.iteritems():
-                if not value.used:
+                is_method_self = name == 'self' and isinstance(upscope, ClassScope)
+                if not value.used and not is_method_self:
                     self.report(messages.UnusedLocal, value.source.lineno, value.source.col_offset, name)
         self.dead_scopes.append(scope)
 
